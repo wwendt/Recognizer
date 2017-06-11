@@ -77,8 +77,23 @@ class SelectorBIC(ModelSelector):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
         # TODO implement model selection based on BIC scores
-        bae_num_components = self.this_word
-        return self.min_n_components(bae_num_components) and self.max_n_components(bae_num_components)
+        best_score = float("-inf")
+        best_model = None
+
+        for number_of_states in range(self.min_n_components, self.max_n_components + 1):
+            try:
+                model = GaussianHMM(n_components=number_of_states, covariance_type="diag", n_iter=1000, random_state=self.random_state, verbose=False).fit(self.X, self.lengths)
+                logL = model.score(self.X, self.lengths)
+
+                parameters = number_of_states *number_of_states + 2 * number_of_states * len(self.X[0]) - 1
+                bic = (-2) * logL + math.log(len(self.X)) * parameters
+
+                if bic > best_score:
+                    best_score = bic
+                    best_model = model
+
+        return best_model
+        #return self.min_n_components(bae_num_components) and self.max_n_components(bae_num_components)
         #raise NotImplementedError
 
 
@@ -104,7 +119,19 @@ class SelectorCV(ModelSelector):
     '''
 
     def select(self):
-        warnings.filterwarnings("ignore", category=DeprecationWarning)
+        #warnings.filterwarnings("ignore", category=DeprecationWarning)
 
         # TODO implement model selection using CV
-        raise NotImplementedError
+        best_score = float('-inf')
+        best_model = GaussianHMM()
+        split_method = KFold()
+
+        number_hidden_states = self.max_n_components - self.min_n_components
+
+        for cv_train_idx, cv_test_idx in split_method.split(self.words):
+            x, lengths = cv_train_idx.get_word_Xlengths(self.words)
+            model = GaussianHMM(n_components=number_hidden_states, n_iter=1000).fit(X, lengths)
+            if logL > best_score:
+                best_score = logL
+                best_model = model
+        return best_model
