@@ -88,7 +88,7 @@ class SelectorBIC(ModelSelector):
                 parameters = number_of_states *number_of_states + 2 * number_of_states * len(self.X[0]) - 1
                 bic = (-2) * logL + math.log(len(self.X)) * parameters
 
-                if bic > best_score:
+                if bic < best_score:
                     best_score = bic
                     best_model = model
 
@@ -146,9 +146,10 @@ class SelectorCV(ModelSelector):
 
         number_hidden_states = self.max_n_components - self.min_n_components
 
-        for cv_train_idx, cv_test_idx in split_method.split(self.words):
-            x, lengths = cv_train_idx.get_word_Xlengths(self.words)
-            model = GaussianHMM(n_components=number_hidden_states, n_iter=1000).fit(X, lengths)
+        for cv_train_idx, cv_test_idx in split_method.split(self.sequences):
+            x_train, lengths_train = combine_sequences(cv_train_idx, self.sequences)
+            model = GaussianHMM(n_components=number_hidden_states, n_iter=1000).fit(x_train, lengths_train)
+            logL = model.GaussianHMM(x_train, lengths_train)
             if logL > best_score:
                 best_score = logL
                 best_model = model
