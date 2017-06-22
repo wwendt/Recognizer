@@ -144,12 +144,14 @@ class SelectorCV(ModelSelector):
         best_model = GaussianHMM()
         split_method = KFold()
 
+
         number_hidden_states = self.max_n_components - self.min_n_components
 
         for cv_train_idx, cv_test_idx in split_method.split(self.sequences):
             x_train, lengths_train = combine_sequences(cv_train_idx, self.sequences)
+            x_test, length_test = combine_sequences(cv_test_idx, self.sequences)
             model = GaussianHMM(n_components=number_hidden_states, n_iter=1000).fit(x_train, lengths_train)
-            logL = model.GaussianHMM(x_train, lengths_train)
+            logL = model.base_model(x_train, lengths_train)
             if logL > best_score:
                 best_score = logL
                 best_model = model
