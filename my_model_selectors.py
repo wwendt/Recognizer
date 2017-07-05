@@ -151,12 +151,12 @@ class SelectorCV(ModelSelector):
             for cv_train_idx, cv_test_idx in split_method.split(self.sequences):
                 x_train, lengths_train = combine_sequences(cv_train_idx, self.sequences)
                 x_test, length_test = combine_sequences(cv_test_idx, self.sequences)
-                model = self.base_model(n_components= components, n_iter=1000).fit(x_train, lengths_train)
+                model = self.base_model(1000).fit(self.x_train, self.lengths_train)
                 logL = model.score(x_train, lengths_train)
-                logs.append(logL)
+                logs.append(components)
             mean = np.mean(logs)
                 
             if mean > best_score:
                 best_score = mean
                 best_model = model
-            return best_model
+                return best_model
