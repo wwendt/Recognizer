@@ -159,4 +159,5 @@ class SelectorCV(ModelSelector):
             if mean > best_score:
                 best_score = mean
                 best_model = model
-                return best_model
+        
+        return best_model
