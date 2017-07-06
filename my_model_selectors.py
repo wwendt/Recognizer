@@ -85,10 +85,10 @@ class SelectorBIC(ModelSelector):
                 model = GaussianHMM(n_components=number_of_states, covariance_type="diag", n_iter=1000, random_state=self.random_state, verbose=False).fit(self.X, self.lengths)
                 logL = model.score(self.X, self.lengths)
 
-                parameters = number_of_states *number_of_states + 2 * number_of_states * len(self.X[0]) - 1
-                bic = (-2) * logL + math.log(len(self.X)) * parameters
+                parameters = number_of_states * number_of_states + 2 * number_of_states * len(self.X[0]) - 1
+                bic = (-2) * logL + math.log(len(self.X[0])) * parameters
 
-                if bic < best_score:
+                if bic > best_score:
                     best_score = bic
                     best_model = model
 
@@ -151,8 +151,8 @@ class SelectorCV(ModelSelector):
             for cv_train_idx, cv_test_idx in split_method.split(self.sequences):
                 x_train, lengths_train = combine_sequences(cv_train_idx, self.sequences)
                 x_test, length_test = combine_sequences(cv_test_idx, self.sequences)
-                model = self.base_model(1000).fit(self.x_train, self.lengths_train)
-                logL = model.score(x_train, lengths_train)
+                model = self.base_model(14).fit(self.x_train, self.lengths_train)
+                logL = model.score(x_test, length_test)
                 logs.append(components)
             mean = np.mean(logs)
                 
