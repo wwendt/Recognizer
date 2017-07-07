@@ -118,6 +118,9 @@ class SelectorDIC(ModelSelector):
         for number_of_states in range(self.min_n_components, self.max_n_components):
             try:
                 model = (GaussianHMM(n_components=number_of_states, covariance_type="diag", n_iter=1000, random_state=self.random_state, verbose=False).fit(self.X, self.lengths))
+                logL = model.score(self.X, self.lengths)
+                parameters = number_of_states * number_of_states + 2 * number_of_states * len(self.X[0]) - 1
+
                 DIC = log(P(X(i))) - 1/(M-1) * SUM(log(P(X(number_of_states))))
 
                 if DIC > best_score:
