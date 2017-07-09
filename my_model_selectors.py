@@ -144,23 +144,28 @@ class SelectorCV(ModelSelector):
 
         # TODO implement model selection using CV
         logs = []
-        best_score = None
+        best_score = float("-inf")
         best_model = None
-        split_method = KFold(n_splits=2)
+        
 
 
         for components in range(self.min_n_components - self.max_n_components +1):
 
-            for cv_train_idx, cv_test_idx in split_method.split(self.sequences):
-                x_train, lengths_train = combine_sequences(cv_train_idx, self.sequences)
-                x_test, length_test = combine_sequences(cv_test_idx, self.sequences)
-                model = self.base_model(14).fit(self.x_train, self.lengths_train)
-                logL = model.score(x_test, length_test)
-                logs.append(components)
-            mean = np.mean(logs)
+            try:
+                split_method = KFold(n_splits=min(3,len(self.lengths)))
+
+                for cv_train_idx, cv_test_idx in split_method.split(self.sequences):
+                    x_train, lengths_train = combine_sequences(cv_train_idx, self.sequences)
+                    x_test, length_test = combine_sequences(cv_test_idx, self.sequences)
+                    model = self.GaussianHMM(n_components=components, n_iter=1000).fit(self.x_train, self.lengths_train)
+                    logL = model.score(x_test, length_test)
+                    logs.append(logL)
+                mean = np.mean(logs)
                 
-            if mean > best_score:
-                best_score = mean
-                best_model = model
+                if mean > best_score:
+                    best_score = mean
+                    best_model = model
         
+            except:
+                split_method = KFold(n_splits=2)
         return best_model
