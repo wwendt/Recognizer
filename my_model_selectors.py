@@ -113,16 +113,28 @@ class SelectorDIC(ModelSelector):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
         best_score = float("-inf")
-        best_model = GaussianHMM()
+        best_model = None
+        
 
         for number_of_states in range(self.min_n_components, self.max_n_components):
             try:
-                model = (GaussianHMM(n_components=number_of_states, covariance_type="diag", n_iter=1000, random_state=self.random_state, verbose=False).fit(self.X, self.lengths))
+                model = self.base_model(number_of_states)
+                score_of_word = model.score(self.X, self.lengths)
+                list_of_word = list(self.words.keys())
+                M = len(list_of_word)
                 logL = model.score(self.X, self.lengths)
-                parameters = number_of_states * number_of_states + 2 * number_of_states * len(self.X[0]) - 1
 
-                DIC = log(len(self.X(i))) - 1/(model-1) * SUM(log(len(self.X(number_of_states))))
+                for word in list_of_word:
+                    if word != self.this_word:
+                        self.this_word = word
+                        model_word = self.base_model(i)
+                        score_word = model.score(self.X, self.lengths)
+                        total_word_score = total_word_score + score_word
 
+
+                
+
+                DIC = score_of_word - (1/(M-1))*total_word_score
                 if DIC > best_score:
                     best_score = DIC
                     best_model = model
