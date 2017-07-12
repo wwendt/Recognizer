@@ -121,7 +121,7 @@ class SelectorDIC(ModelSelector):
                 logL = model.score(self.X, self.lengths)
                 parameters = number_of_states * number_of_states + 2 * number_of_states * len(self.X[0]) - 1
 
-                DIC = log(P(X(i))) - 1/(M-1) * SUM(log(P(X(number_of_states))))
+                DIC = log(len(self.X(i))) - 1/(model-1) * SUM(log(len(self.X(number_of_states))))
 
                 if DIC > best_score:
                     best_score = DIC
@@ -143,7 +143,7 @@ class SelectorCV(ModelSelector):
         #warnings.filterwarnings("ignore", category=DeprecationWarning)
 
         # TODO implement model selection using CV
-        logs = []
+        
         best_score = float("-inf")
         best_model = None
         
@@ -153,19 +153,26 @@ class SelectorCV(ModelSelector):
 
             try:
                 split_method = KFold(n_splits=min(3,len(self.lengths)))
+                logs = []
+
+                model = None
 
                 for cv_train_idx, cv_test_idx in split_method.split(self.sequences):
-                    x_train, lengths_train = combine_sequences(cv_train_idx, self.sequences)
+                    self.X, self.lengths = combine_sequences(cv_train_idx, self.sequences)
+                    model = self.base_model(components)
                     x_test, length_test = combine_sequences(cv_test_idx, self.sequences)
-                    model = self.GaussianHMM(n_components=components, n_iter=1000).fit(self.x_train, self.lengths_train)
+            
                     logL = model.score(x_test, length_test)
                     logs.append(logL)
                 mean = np.mean(logs)
                 
-                if mean > best_score:
+                if mean < best_score:
                     best_score = mean
                     best_model = model
         
-            except:
-                split_method = KFold(n_splits=2)
-        return best_model
+            except Exception as e:
+                pass
+        if best_model is not None:
+            return best_model
+        else:
+            return self.base_model(self.n_constant)
