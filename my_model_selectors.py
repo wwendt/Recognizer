@@ -83,12 +83,14 @@ class SelectorBIC(ModelSelector):
         for number_of_states in range(self.min_n_components, self.max_n_components + 1):
             try:
                 model = GaussianHMM(n_components=number_of_states, covariance_type="diag", n_iter=1000, random_state=self.random_state, verbose=False).fit(self.X, self.lengths)
+                
+                    
                 logL = model.score(self.X, self.lengths)
 
                 parameters = number_of_states * number_of_states + 2 * number_of_states * len(self.X[0]) - 1
-                bic = (-2) * logL + math.log(len(self.X[0])) * parameters
+                bic = (-2) * logL + math.log(len(self.X)) * parameters
 
-                if bic > best_score:
+                if bic < best_score:
                     best_score = bic
                     best_model = model
 
@@ -124,7 +126,7 @@ class SelectorDIC(ModelSelector):
                 M = len(list_of_word)
                 logL = model.score(self.X, self.lengths)
 
-                for word in list_of_word:
+                for word in self.hwords.items():
                     if word != self.this_word:
                         self.this_word = word
                         model_word = self.base_model(i)
@@ -164,7 +166,7 @@ class SelectorCV(ModelSelector):
         for components in range(self.min_n_components - self.max_n_components +1):
 
             try:
-                split_method = KFold(n_splits=min(3,len(self.lengths)))
+                split_method = KFold(n_splits=2)
                 logs = []
 
                 model = None
