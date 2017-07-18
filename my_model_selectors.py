@@ -87,16 +87,12 @@ class SelectorBIC(ModelSelector):
                     
                 logL = model.score(self.X, self.lengths)
 
-                parameters = number_of_states * number_of_states + 2 * number_of_states * len(self.X[0]) - 1
+                parameters = number_of_states * number_of_states + 2 * number_of_states * len(self.X) - 1
                 bic = (-2) * logL + math.log(len(self.X)) * parameters
 
                 if bic < best_score:
                     best_score = bic
                     best_model = model
-
-            except:
-                pass
-
         return best_model
         #return self.min_n_components(bae_num_components) and self.max_n_components(bae_num_components)
         #raise NotImplementedError
