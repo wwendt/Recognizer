@@ -116,28 +116,22 @@ class SelectorDIC(ModelSelector):
         best_model = None
         
 
-        for number_of_states in range(self.min_n_components, self.max_n_components):
+        for number_of_states in range(self.min_n_components, self.max_n_components+1):
             try:
                 model = self.base_model(number_of_states)
-                score_of_word = model.score(self.X, self.lengths)
-                list_of_word = list(self.words.keys())
-                M = len(list_of_word)
-                logL = model.score(self.X, self.lengths)
+                total_word_score = []
 
-                for word in self.hwords.items():
+                for word, (X, lengths) in self.hwords.items():
                     if word != self.this_word:
-                        self.this_word = word
-                        model_word = self.base_model(i)
-                        score_word = model.score(self.X, self.lengths)
-                        total_word_score = total_word_score + score_word
-
-
+                        score_of_word = model.score(X, lengths)
+                        total_word_score.append(score_of_word)
+                
                 
 
-                DIC = score_of_word - (1/(M-1))*total_word_score
-                if DIC > best_score:
-                    best_score = DIC
-                    best_model = model
+                score = model.score(self.X, self.lengths) - np.mean(total_word_score)
+                if score > best_score:
+                    best_score = score
+                    best_model = model 
 
             except:
                 pass

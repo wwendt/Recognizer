@@ -27,7 +27,7 @@ def recognize(models: dict, test_set: SinglesData):
    """
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     probabilities = [word_prob(hword, models) for hword in list(test_set.get_all_Xlengths().values())]
-    guesses = [max(words_prob, key=lambda w: words_prob[w] for words_prob in probabilities)]
+    guesses = [max(words_prob, key=lambda w: words_prob[w]) for prob in probabilities]
     # TODO implement the recognizer
     # return probabilities, guesses
-    return probabilities, guess
+    return probabilities, guesses
